@@ -1,7 +1,7 @@
 'use client';
  
 import { useChat } from 'ai/react';
- 
+// default value for api is /api/chat
 const options = {api: '/api/exp'};
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit } = useChat(options);
