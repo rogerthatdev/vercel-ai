@@ -11,7 +11,7 @@ const vertexAI = new VertexAI({ project: project, location: location });
 
 // Instantiate Gemini models
 const generativeModel = vertexAI.getGenerativeModel({
-  model: "gemini-pro"
+  model: "gemini-pro",
 });
 
 const buildGoogleGenAIPrompt = (messages: Message[]) => ({
@@ -29,11 +29,12 @@ export async function POST(req: Request) {
   // Extract the `prompt` from the body of the request
   const { messages } = await req.json();
 
-  const geminiStream = await generativeModel
-    .generateContentStream(buildGoogleGenAIPrompt(messages));
+  const geminiStream = await generativeModel.generateContentStream(
+    buildGoogleGenAIPrompt(messages)
+  );
 
   // Convert the response into a friendly text-stream
-  // GoogleGenerativeAIStream class decodes/extracts the text tokens in the 
+  // GoogleGenerativeAIStream class decodes/extracts the text tokens in the
   // response and then re-encodes them properly for simple consumption.
   const stream = GoogleGenerativeAIStream(geminiStream);
 
