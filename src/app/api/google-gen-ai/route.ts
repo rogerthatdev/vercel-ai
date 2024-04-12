@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     .generateContentStream(buildGoogleGenAIPrompt(messages));
  
   // Convert the response into a friendly text-stream
-  //  GoogleGenerativeAIStream class decodes/extracts the text tokens in the response and then re-encodes them properly for simple consumption.
+  // GoogleGenerativeAIStream class decodes/extracts the text tokens in the response and then re-encodes them properly for simple consumption.
   const stream = GoogleGenerativeAIStream(geminiStream);
  
   // Respond with the stream
