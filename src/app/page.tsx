@@ -2,7 +2,7 @@
  
 import { useChat } from 'ai/react';
 // default value for api is /api/chat
-const options = {api: '/api/vertex-gen-ai'};
+const options = {api: '/api/vertex-teacher'};
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat(options);
   console.log(messages)
