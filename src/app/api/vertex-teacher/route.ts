@@ -8,53 +8,79 @@ const vertexAI = new VertexAI({ project: project, location: location });
 
 // The example for Google GenAI API uses the edge runtime. This will not work with Vertex AI
 // export const runtime = 'edge';
+// const model = 'gemini-1.5-flash-preview-0514';
 const model = 'gemini-1.5-flash-preview-0514';
 // Instantiate the models
-const generativeModel = vertexAI.preview.getGenerativeModel({
+const generativeModel = vertexAI.getGenerativeModel({
   model: model,
   generationConfig: {
     'maxOutputTokens': 8192,
     'temperature': 1,
     'topP': 0.95,
   },
+  // safetySettings: [
+  //   {
+  //       'category': 'HARM_CATEGORY_HATE_SPEECH',
+  //       'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+  //   },
+  //   {
+  //       'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+  //       'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+  //   },
+  //   {
+  //       'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+  //       'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+  //   },
+  //   {
+  //       'category': 'HARM_CATEGORY_HARASSMENT',
+  //       'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+  //   }
+  // ],
   safetySettings: [
     {
-        'category': 'HARM_CATEGORY_HATE_SPEECH',
-        'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+      'category': 'HARM_CATEGORY_HATE_SPEECH',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
     },
     {
-        'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+      'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+      'threshold': 'BLOCK_LOW_AND_ABOVE',
     },
     {
-        'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-        'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+      'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+      'threshold': 'BLOCK_MEDIUM_AND_ABOVE',
     },
     {
-        'category': 'HARM_CATEGORY_HARASSMENT',
-        'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+      'category': 'HARM_CATEGORY_HARASSMENT',
+      'threshold': 'BLOCK_LOW_AND_ABOVE',
     }
   ],
-  systemInstruction: {
-    parts: [{"text": `You are a fifth grade teacher. Your name is Mrs. Dec.`}]
-  },
+// as a Content
+  // systemInstruction: {
+  //   parts: [{"text": `You are a fifth grade teacher. Your name is Mrs. Dec.`}],
+  //   role: 'user'
+  // },
+  systemInstruction: {'role': 'user', 'content': "You are a fifth grade teacher. Your name is Mrs. Dec."},
+  // as a string
+  // systemInstruction: `You are a fifth grade teacher. Your name is Mrs. Dec.`
 });
 
-const buildGoogleGenAIPrompt = (messages: Message[]) => ({
-  contents: messages
-    .filter(
-      (message) => message.role === "user" || message.role === "assistant"
-    )
-    .map((message) => ({
+const systemInstruction = {'role': 'user', 'content': 'You are a fifth grade teacher. Your name is Mrs. Dec.'}
+
+const buildGoogleGenAIPrompt = (messages: Message[]) => {
+  const transformed =  { contents: messages    
+    .filter(message => message.role === "user" || message.role === "assistant")
+    .map(message => ({
       role: message.role === "user" ? "user" : "model",
       parts: [{ text: message.content }],
-    })),
-});
+    }))}
+    return transformed
+};
 
 export async function POST(req: Request) {
   // Extract the `prompt` from the body of the request
   const { messages } = await req.json();
-
+  
+  console.log(messages)
   const geminiStream = await generativeModel.generateContentStream(
     buildGoogleGenAIPrompt(messages)
   );
@@ -67,3 +93,4 @@ export async function POST(req: Request) {
   // Respond with the stream
   return new StreamingTextResponse(stream);
 }
+
